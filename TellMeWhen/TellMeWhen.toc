@@ -1,0 +1,11 @@
+# Originally by Nephthys of Hyjal
+# Rewritten by Kader
+## Interface: 30300
+## Title: TellMeWhen
+## Notes: Notifications about cooldowns, buffs, etc.
+## SavedVariablesPerCharacter: TellMeWhen_Settings
+## X-Embeds: LibStub
+
+Libs\Embeds.xml
+Locales\Locales.xml
+TellMeWhen.lua

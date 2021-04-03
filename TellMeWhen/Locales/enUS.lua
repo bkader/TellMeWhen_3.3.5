@@ -69,3 +69,4 @@ L["Unlock"] = true
 L["Unusable"] = true
 L["Usable"] = true
 L["Weapon slot to monitor"] = true
+L['Icons work when locked. When unlocked, you can move/size icon groups and right click individual icons for more settings. You can also type "/tellmewhen" or "/tmw" to lock/unlock.'] = true

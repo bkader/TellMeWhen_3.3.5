@@ -34,7 +34,6 @@ L["Cooldown"] = true
 L["Debuff"] = true
 L["Enable"] = true
 L["Enter the Name or Id of the Spell, Ability, Item, Buff, Debuff you want this icon to monitor. You can add multiple Buffs/Debuffs by seperating them with ;"] = true
-L["Focus Target"] = true
 L["Group %d position successfully reset."] = true
 L["Groups have been reset!"] = true
 L["Icon type"] = true

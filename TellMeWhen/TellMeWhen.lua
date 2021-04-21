@@ -53,6 +53,8 @@ local iconDefaults = {
 
 local groupDefaults = {
     Enabled = false,
+    Width = 30,
+    Height = 30,
     Scale = 2.0,
     Rows = 1,
     Columns = 4,

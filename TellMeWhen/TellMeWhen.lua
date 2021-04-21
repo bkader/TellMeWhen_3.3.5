@@ -130,17 +130,27 @@ local function TellMeWhen_CreateGroup(name, parent, ...)
     return group
 end
 
-local function TellMeWhen_CreateIcon(name, parent)
+local function TellMeWhen_CreateIcon(name, parent, width, height)
+    width = width or 30
+    height = height or 30
+
+    local left = (36 - width) / 72
+    local right = 1 - left
+    local top = (36 - height) / 72
+    local bottom = 1 - top
+
     local icon = CreateFrame("Frame", name, parent)
-    icon:SetSize(30, 30)
+    icon:SetSize(width, height)
 
     local t = icon:CreateTexture(nil, "BACKGROUND")
-    t:SetTexture([[Interface\Buttons\UI-EmptySlot-Disabled]])
-    t:SetSize(46, 46)
-    t:SetPoint("CENTER")
+    t:SetTexture([[Interface\DialogFrame\UI-DialogBox-Background]])
+    t:SetTexCoord(left, right, top, bottom)
+    t:SetAllPoints(icon)
+    icon.bg = t
 
     t = icon:CreateTexture("$parentTexture", "ARTWORK")
     t:SetTexture([[Interface\Icons\INV_Misc_QuestionMark]])
+    t:SetTexCoord(left, right, top, bottom)
     t:SetAllPoints(icon)
     icon.texture = t
 
@@ -187,6 +197,21 @@ local function TellMeWhen_CreateIcon(name, parent)
     end)
 
     return icon
+end
+
+local function TellMeWhen_ResizeIcon(icon, width, height)
+    if not icon then return end
+    width = width or 30
+    height = height or 30
+
+    local left = (36 - width) / 72
+    local right = 1 - left
+    local top = (36 - height) / 72
+    local bottom = 1 - top
+
+    icon:SetSize(width, height)
+    icon.bg:SetTexCoord(left, right, top, bottom)
+    icon.texture:SetTexCoord(left, right, top, bottom)
 end
 
 -- -------------
@@ -871,6 +896,8 @@ function core:Group_Update(groupID)
     local activePriSpec = DB.Groups[groupID].PrimarySpec
     local activeSecSpec = DB.Groups[groupID].SecondarySpec
     local iconSpacing = DB.Groups[groupID].Spacing or 1
+    local iconWidth = DB.Groups[groupID].Width or 30
+    local iconHeight = DB.Groups[groupID].Height or 30
 
     if (currentSpec == 1 and not activePriSpec) or (currentSpec == 2 and not activeSecSpec) then
         genabled = false
@@ -881,7 +908,12 @@ function core:Group_Update(groupID)
             for column = 1, columns do
                 local iconID = (row - 1) * columns + column
                 local iconName = groupName .. "_Icon" .. iconID
-                local icon = _G[iconName] or TellMeWhen_CreateIcon(iconName, group)
+                local icon = _G[iconName]
+                if not icon then
+                    icon = TellMeWhen_CreateIcon(iconName, group, iconWidth, iconHeight)
+                elseif icon:GetHeight() ~= iconHeight or icon:GetWidth() ~= iconWidth then
+                    TellMeWhen_ResizeIcon(icon, iconWidth, iconHeight)
+                end
                 icon:SetID(iconID)
                 icon:Show()
                 if (column > 1) then
@@ -1324,10 +1356,34 @@ f:SetScript("OnEvent", function(self, event, ...)
                         desc = L["Check to only show this group of icons while in combat."],
                         order = 4
                     },
+                    Width = {
+                        type = "range",
+                        name = L["Width"],
+                        order = 5,
+                        min = 15,
+                        max = 30,
+                        step = 1,
+                        bigStep = 1,
+                        get = function()
+                            return DB.Groups[i].Width or 30
+                        end
+                    },
+                    Height = {
+                        type = "range",
+                        name = L["Height"],
+                        order = 6,
+                        min = 15,
+                        max = 30,
+                        step = 1,
+                        bigStep = 1,
+                        get = function()
+                            return DB.Groups[i].Height or 30
+                        end
+                    },
                     Scale = {
                         type = "range",
                         name = L["Scale"],
-                        order = 5,
+                        order = 7,
                         min = 0.5,
                         max = 8,
                         step = 0.01,
@@ -1337,7 +1393,7 @@ f:SetScript("OnEvent", function(self, event, ...)
                         type = "range",
                         name = L["Columns"],
                         desc = L["Set the number of icon columns in this group."],
-                        order = 6,
+                        order = 8,
                         min = 1,
                         max = 8,
                         step = 1
@@ -1346,7 +1402,7 @@ f:SetScript("OnEvent", function(self, event, ...)
                         type = "range",
                         name = L["Rows"],
                         desc = L["Set the number of icon rows in this group."],
-                        order = 6,
+                        order = 9,
                         min = 1,
                         max = maxRows,
                         step = 1
@@ -1354,7 +1410,7 @@ f:SetScript("OnEvent", function(self, event, ...)
                     Spacing = {
                         type = "range",
                         name = L["Spacing"],
-                        order = 7,
+                        order = 10,
                         min = 0,
                         max = 50,
                         step = 1
@@ -1362,12 +1418,12 @@ f:SetScript("OnEvent", function(self, event, ...)
                     sep1 = {
                         type = "description",
                         name = " ",
-                        order = 8
+                        order = 11
                     },
                     Reset = {
                         type = "execute",
                         name = L["Reset Position"],
-                        order = 9,
+                        order = 99,
                         width = "full",
                         func = function()
                             local locked

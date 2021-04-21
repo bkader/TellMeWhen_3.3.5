@@ -11,6 +11,7 @@ local GetSpellTexture = GetSpellTexture
 local IsSpellInRange = IsSpellInRange
 local IsUsableSpell = IsUsableSpell
 local UnitBuff, UnitDebuff = UnitBuff, UnitDebuff
+local hasElvUI
 
 local LiCD = LibStub("LibInternalCooldowns", true)
 if LiCD and LiCD.GetItemCooldown then
@@ -94,9 +95,7 @@ local function TellMeWhen_CreateGroup(name, parent, ...)
     group:SetSize(1, 1)
     group:SetToplevel(true)
     group:SetMovable(true)
-    if select(1, ...) then
-        group:SetPoint(...)
-    end
+    if select(1, ...) then group:SetPoint(...) end
 
     local t = group:CreateTexture(nil, "BACKGROUND")
     t:SetTexture(0, 0, 0, 0)
@@ -113,12 +112,8 @@ local function TellMeWhen_CreateGroup(name, parent, ...)
     t:SetSize(10, 10)
     t:SetAllPoints(resize)
     resize.texture = t
-    resize:SetScript("OnMouseDown", function(self, button)
-        core:StartSizing(self, button)
-    end)
-    resize:SetScript("OnMouseUp", function(self, button)
-        core:StopSizing(self, button)
-    end)
+    resize:SetScript("OnMouseDown", function(self, button) core:StartSizing(self, button) end)
+    resize:SetScript("OnMouseUp", function(self, button) core:StopSizing(self, button) end)
     resize:SetScript("OnEnter", function(self)
         core:GUIButton_OnEnter(self, L["Resize"], L["Click and drag to change size."])
         self.texture:SetVertexColor(1, 1, 1)
@@ -133,8 +128,8 @@ local function TellMeWhen_CreateGroup(name, parent, ...)
 end
 
 local function TellMeWhen_CreateIcon(name, parent, width, height)
-    width = width or 30
-    height = height or 30
+    width = hasElvUI and 30 or width or 30
+    height = hasElvUI and 30 or height or 30
 
     local left = (36 - width) / 72
     local right = 1 - left
@@ -179,32 +174,26 @@ local function TellMeWhen_CreateIcon(name, parent, width, height)
         UIDropDownMenu_Initialize(self, core.IconMenu_Initialize, "MENU")
     end)
 
-    icon:SetScript("OnEnter", function(self, motion)
-        core:Icon_OnEnter(self, motion)
-    end)
-    icon:SetScript("OnLeave", function(self)
-        GameTooltip:Hide()
-    end)
+    icon:SetScript("OnEnter", function(self, motion) core:Icon_OnEnter(self, motion) end)
+    icon:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+
     icon:RegisterForDrag("LeftButton")
-    icon:SetScript("OnDragStart", function(self)
-        self:GetParent():StartMoving()
-    end)
+    icon:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
     icon:SetScript("OnDragStop", function(self)
         self:GetParent():StopMovingOrSizing()
         local group = DB.Groups[self:GetParent():GetID()]
         group.point, _, _, group.x, group.y = self:GetParent():GetPoint(1)
     end)
-    icon:SetScript("OnMouseDown", function(self, button)
-        core:Icon_OnMouseDown(self, button)
-    end)
+    icon:SetScript("OnMouseDown", function(self, button) core:Icon_OnMouseDown(self, button) end)
 
     return icon
 end
 
 local function TellMeWhen_ResizeIcon(icon, width, height)
     if not icon then return end
-    width = width or 30
-    height = height or 30
+
+    width = hasElvUI and 30 or width or 30
+    height = hasElvUI and 30 or height or 30
 
     local left = (36 - width) / 72
     local right = 1 - left
@@ -239,12 +228,8 @@ do
         local scalingFrame = icon:GetParent()
         local cursorX, cursorY = GetCursorPosition(UIParent)
 
-        local newXScale =
-            scalingFrame.oldScale * (cursorX / uiScale - scalingFrame.oldX * scalingFrame.oldScale) /
-            (icon.oldCursorX / uiScale - scalingFrame.oldX * scalingFrame.oldScale)
-        local newYScale =
-            scalingFrame.oldScale * (cursorY / uiScale - scalingFrame.oldY * scalingFrame.oldScale) /
-            (icon.oldCursorY / uiScale - scalingFrame.oldY * scalingFrame.oldScale)
+        local newXScale = scalingFrame.oldScale * (cursorX / uiScale - scalingFrame.oldX * scalingFrame.oldScale) / (icon.oldCursorX / uiScale - scalingFrame.oldX * scalingFrame.oldScale)
+        local newYScale = scalingFrame.oldScale * (cursorY / uiScale - scalingFrame.oldY * scalingFrame.oldScale) / (icon.oldCursorY / uiScale - scalingFrame.oldY * scalingFrame.oldScale)
         local newScale = max(0.6, newXScale, newYScale)
         scalingFrame:SetScale(newScale)
 
@@ -897,7 +882,7 @@ function core:Group_Update(groupID)
     local onlyInCombat = DB.Groups[groupID].OnlyInCombat
     local activePriSpec = DB.Groups[groupID].PrimarySpec
     local activeSecSpec = DB.Groups[groupID].SecondarySpec
-    local iconSpacing = DB.Groups[groupID].Spacing or 1
+    local iconSpacing = TELLMEWHEN_ICONSPACING or DB.Groups[groupID].Spacing or 1
     local iconWidth = DB.Groups[groupID].Width or 30
     local iconHeight = DB.Groups[groupID].Height or 30
 
@@ -921,13 +906,7 @@ function core:Group_Update(groupID)
                 if (column > 1) then
                     icon:SetPoint("TOPLEFT", _G[groupName .. "_Icon" .. (iconID - 1)], "TOPRIGHT", iconSpacing, 0)
                 elseif row > 1 and column == 1 then
-                    icon:SetPoint(
-                        "TOPLEFT",
-                        _G[groupName .. "_Icon" .. (iconID - columns)],
-                        "BOTTOMLEFT",
-                        0,
-                        -iconSpacing
-                    )
+                    icon:SetPoint("TOPLEFT", _G[groupName .. "_Icon" .. (iconID - columns)], "BOTTOMLEFT", 0, -iconSpacing)
                 elseif iconID == 1 then
                     icon:SetPoint("TOPLEFT", group, "TOPLEFT")
                 end
@@ -1286,6 +1265,12 @@ f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("PLAYER_TALENT_UPDATE")
 f:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" and arg1 == folder then
+        if _G.ElvUI then
+            _G.TELLMEWHEN_VERSION = "1.2.4"
+            _G.TellMeWhen_Group_Update = TellMeWhen.Group_Update
+            hasElvUI = true
+        end
+
         if type(TellMeWhen_Settings) ~= "table" or not next(TellMeWhen_Settings) then
             for i = 1, maxGroups do
                 defaults.Groups[i] = groupDefaults
@@ -1317,7 +1302,7 @@ f:SetScript("OnEvent", function(self, event, ...)
         core:Update()
 
         for i = 1, maxGroups do
-            options.args["group" .. i] = {
+            local opt = {
                 type = "group",
                 name = GROUP .. " " .. i,
                 order = i,
@@ -1358,30 +1343,6 @@ f:SetScript("OnEvent", function(self, event, ...)
                         desc = L["Check to only show this group of icons while in combat."],
                         order = 4
                     },
-                    Width = {
-                        type = "range",
-                        name = L["Width"],
-                        order = 5,
-                        min = 15,
-                        max = 30,
-                        step = 1,
-                        bigStep = 1,
-                        get = function()
-                            return DB.Groups[i].Width or 30
-                        end
-                    },
-                    Height = {
-                        type = "range",
-                        name = L["Height"],
-                        order = 6,
-                        min = 15,
-                        max = 30,
-                        step = 1,
-                        bigStep = 1,
-                        get = function()
-                            return DB.Groups[i].Height or 30
-                        end
-                    },
                     Scale = {
                         type = "range",
                         name = L["Scale"],
@@ -1407,14 +1368,6 @@ f:SetScript("OnEvent", function(self, event, ...)
                         order = 9,
                         min = 1,
                         max = maxRows,
-                        step = 1
-                    },
-                    Spacing = {
-                        type = "range",
-                        name = L["Spacing"],
-                        order = 10,
-                        min = 0,
-                        max = 50,
                         step = 1
                     },
                     sep1 = {
@@ -1451,6 +1404,41 @@ f:SetScript("OnEvent", function(self, event, ...)
                     }
                 }
             }
+            if not hasElvUI then
+                opt.args.Width = {
+                    type = "range",
+                    name = L["Width"],
+                    order = 5,
+                    min = 15,
+                    max = 30,
+                    step = 1,
+                    bigStep = 1,
+                    get = function()
+                        return DB.Groups[i].Width or 30
+                    end
+                }
+                opt.args.Height = {
+                    type = "range",
+                    name = L["Height"],
+                    order = 6,
+                    min = 15,
+                    max = 30,
+                    step = 1,
+                    bigStep = 1,
+                    get = function()
+                        return DB.Groups[i].Height or 30
+                    end
+                }
+                opt.args.Spacing = {
+                    type = "range",
+                    name = L["Spacing"],
+                    order = 10,
+                    min = 0,
+                    max = 50,
+                    step = 1
+                }
+            end
+            options.args["group" .. i] = opt
         end
 
         core.options = options

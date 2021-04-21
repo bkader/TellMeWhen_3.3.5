@@ -2,6 +2,22 @@
 
 This is the same old TellMeWhen available for _WoTLK_, with the exception of being more organized, clean code, localized, Spell ID sensitive and as a bonus: it even tracks internal cooldowns using _LibInternalCooldowns_ library.
 
+## Install:
+
+1. [Download the package.](https://github.com/bkader/TellMeWhen_3.3.5/archive/refs/heads/main.zip)
+2. Open the archive, then open folder `TellMeWhen_3.3.5-main`.
+3. extract the single folder `TellMeWhen` to `Interface\AddOns`.
+4. Enjoy!
+
+## What's different from default one?
+
+1. Code cleaned and optimized.
+2. If you use spell IDs, it won't get confused when it comes with spells with the same name.
+3. Localized! If you want to help me add more locales, please contact me on Discord.
+4. In addition to normal cooldowns, it tracks spells and items internal cooldowns.
+5. Better configuration interface.
+6. Additional settings for groups and icons: **width**, **height** and **spacing**.
+
 ## Equivalencies:
 
 There is a table of spells available when icons are named properly, instead of using several spell IDs or names as the icon name, you can use the _string_ equivalent for what you want. Below is the list of what you can name the icon and what tracks:

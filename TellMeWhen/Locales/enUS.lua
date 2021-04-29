@@ -4,16 +4,16 @@ local setmetatable = setmetatable
 local tostring, format = tostring, string.format
 local rawset, rawget = rawset, rawget
 local L = setmetatable({}, {
-    __newindex = function(self, key, value)
-        rawset(self, key, value == true and key or value)
-    end,
-    __index = function(self, key)
-        return key
-    end
+	__newindex = function(self, key, value)
+		rawset(self, key, value == true and key or value)
+	end,
+	__index = function(self, key)
+		return key
+	end
 })
 function L:F(line, ...)
-    line = L[line]
-    return format(line, ...)
+	line = L[line]
+	return format(line, ...)
 end
 core.L = L
 
@@ -34,6 +34,7 @@ L["Cooldown"] = true
 L["Debuff"] = true
 L["Enable"] = true
 L["Enter the Name or Id of the Spell, Ability, Item, Buff, Debuff you want this icon to monitor. You can add multiple Buffs/Debuffs by seperating them with ;"] = true
+L["Focus Target"] = true
 L["Group %d position successfully reset."] = true
 L["Groups have been reset!"] = true
 L["Height"] = true

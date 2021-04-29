@@ -19,6 +19,7 @@ local L = core.L
 -- L["Debuff"] = ""
 -- L["Enable"] = ""
 -- L["Enter the Name or Id of the Spell, Ability, Item, Buff, Debuff you want this icon to monitor. You can add multiple Buffs/Debuffs by seperating them with ;"] = ""
+-- L["Focus Target"] = ""
 -- L["Group %d position successfully reset."] = ""
 -- L["Groups have been reset!"] = ""
 -- L["Height"] = ""

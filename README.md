@@ -50,4 +50,8 @@ There is a table of spells available when icons are named properly, instead of u
 
 You can track internal cooldowns, items or spells, just like you track other cooldowns. If the spell ID doesn't work, try using the spell name instead.
 
+## Show Love & Support
+
+Though it's not required and I have never asked for it but people keep asking for it, if you want to show love and support, your PayPal donations are most welcome to **bkader[at]email.com**.
+
 **All credits to the original author**

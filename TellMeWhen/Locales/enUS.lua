@@ -59,6 +59,7 @@ L["Set the number of icon rows in this group."] = true
 L["Show and enable this group of icons."] = true
 L["Show icon when"] = true
 L["Show timer"] = true
+L["Disable OmniCC"]= true
 L["Spacing"] = true
 L["Spell or ability"] = true
 L["Target of Target"] = true

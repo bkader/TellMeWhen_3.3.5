@@ -44,6 +44,7 @@ L["Set the number of icon rows in this group."] = "Nombre de lignes d'icônes da
 L["Show and enable this group of icons."] = "Afficher et activer ce groupe d'icônes."
 L["Show icon when"] = "Afficher quand"
 L["Show timer"] = "Afficher la temps"
+L["Disable OmniCC"] = "Désactiver OmniCC"
 L["Spacing"] = "Espacement"
 L["Spell or ability"] = "Sort ou abilité"
 L["Target of Target"] = "Cible de la cible"

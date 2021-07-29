@@ -44,6 +44,7 @@ local L = core.L
 -- L["Show and enable this group of icons."] = ""
 -- L["Show icon when"] = ""
 -- L["Show timer"] = ""
+L["Disable OmniCC"] = "OmniCC 사용 안함"
 -- L["Spacing"] = ""
 -- L["Spell or ability"] = ""
 -- L["Target of Target"] = ""

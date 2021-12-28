@@ -2,9 +2,16 @@
 # Rewritten by Kader
 ## Interface: 30300
 ## Title: TellMeWhen
+## Author: Kader (|cff808080bkader#6361|r)
 ## Notes: Notifications about cooldowns, buffs, etc.
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
-## X-Embeds: LibStub
+## X-Date: 2021-12-28 @ 04:13 AM |cff808080UTC|r
+## X-Credits: Nephthys
+## X-Category: Combat
+## X-Email: bkader@mail.com
+## X-Website: https://github.com/bkader/TellMeWhen_3.3.5
+## X-Discord: https://discord.gg/a8z5CyS3eW
+## X-Donate: |cff0079c1PayPal|r or |cff246a96Paysera|r at |cff20ff20bkader@mail.com|r
 
 Libs\Embeds.xml
 Locales\Locales.xml

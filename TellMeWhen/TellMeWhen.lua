@@ -11,6 +11,8 @@ local GetSpellTexture = GetSpellTexture
 local IsSpellInRange = IsSpellInRange
 local IsUsableSpell = IsUsableSpell
 local IsSpellKnown = IsSpellKnown
+local GetItemInfo = GetItemInfo
+local IsEquippedItem = IsEquippedItem
 local UnitBuff, UnitDebuff = UnitBuff, UnitDebuff
 local hasElvUI
 
@@ -391,7 +393,7 @@ local function TellMeWhen_Icon_ItemCooldown_OnUpdate(self, elapsed)
 	self.updateTimer = self.updateTimer - elapsed
 	if self.updateTimer <= 0 then
 		self.updateTimer = updateInterval
-		local _, timeLeft, _ = GetItemCooldown(self.Name[1] or "")
+		local _, timeLeft, _ = GetItemCooldown(self.iName or self.Name[1] or "")
 		if timeLeft then
 			if timeLeft == 0 or TellMeWhen_GetGCD() == timeLeft then
 				self:SetAlpha(self.usableAlpha)
@@ -402,8 +404,12 @@ local function TellMeWhen_Icon_ItemCooldown_OnUpdate(self, elapsed)
 	end
 end
 
-local function TellMeWhen_Icon_ItemCooldown_OnEvent(self)
-	local startTime, timeLeft, enable = GetItemCooldown(self.Name[1] or "")
+local function TellMeWhen_Icon_ItemCooldown_OnEvent(self, event)
+	if event == "PLAYER_EQUIPMENT_CHANGED" then
+		core:Icon_Update(self, self.groupID, self.iconID)
+	end
+
+	local startTime, timeLeft, enable = GetItemCooldown(self.iName or self.Name[1] or "")
 	if timeLeft then
 		CooldownFrame_SetTimer(self.Cooldown, startTime, timeLeft, 1)
 	end
@@ -1027,6 +1033,8 @@ function core:Icon_Update(icon, groupID, iconID)
 	icon.WpnEnchantType = iconSettings.WpnEnchantType
 	icon.noCooldownCount = iconSettings.noCooldownCount
 
+	icon.groupID = icon.groupID or groupID
+	icon.iconID = icon.iconID or iconID
 	icon.updateTimer = updateInterval
 
 	icon:UnregisterEvent("ACTIONBAR_UPDATE_STATE")
@@ -1036,6 +1044,7 @@ function core:Icon_Update(icon, groupID, iconID)
 	icon:UnregisterEvent("PLAYER_FOCUS_CHANGED")
 	icon:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	icon:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+	icon:UnregisterEvent("PLAYER_EQUIPMENT_CHANGED")
 	icon:UnregisterEvent("BAG_UPDATE_COOLDOWN")
 	icon:UnregisterEvent("UNIT_AURA")
 	icon:UnregisterEvent("PLAYER_TOTEM_UPDATE")
@@ -1091,17 +1100,24 @@ function core:Icon_Update(icon, groupID, iconID)
 					icon.texture:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 				end
 			elseif CooldownType == "item" then
-				local itemName, _, _, _, _, _, _, _, _, itemTexture = GetItemInfo(icon.Name[1] or "")
-				if itemName then
-					icon.texture:SetTexture(itemTexture)
-					icon:SetScript("OnUpdate", TellMeWhen_Icon_ItemCooldown_OnUpdate)
-					if icon.ShowTimer then
-						icon:RegisterEvent("BAG_UPDATE_COOLDOWN")
-						icon:SetScript("OnEvent", TellMeWhen_Icon_ItemCooldown_OnEvent)
-					else
-						icon:SetScript("OnEvent", nil)
+				icon.iName = nil
+				for _, name in ipairs(icon.Name) do
+					local itemName, _, _, _, _, _, _, _, _, itemTexture = GetItemInfo(name or "")
+					if itemName and IsEquippedItem(itemName) then
+						icon.iName = itemName
+						icon.texture:SetTexture(itemTexture)
+						icon:SetScript("OnUpdate", TellMeWhen_Icon_ItemCooldown_OnUpdate)
+						if icon.ShowTimer then
+							icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+							icon:RegisterEvent("BAG_UPDATE_COOLDOWN")
+							icon:SetScript("OnEvent", TellMeWhen_Icon_ItemCooldown_OnEvent)
+						else
+							icon:SetScript("OnEvent", nil)
+						end
+						break
 					end
-				else
+				end
+				if icon.iName == nil then
 					core:Icon_ClearScripts(icon)
 					icon.learnedTexture = false
 					icon.texture:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
@@ -1229,10 +1245,8 @@ function core:GetActiveTalentGroup()
 	return activeSpec
 end
 
-function core:Print(msg)
-	if msg then
-		print("|cff33ff99TellMeWhen|r", tostring(msg))
-	end
+function core:Print(...)
+	print("|cff33ff99TellMeWhen|r", ...)
 end
 
 function core:Update()
@@ -1330,11 +1344,11 @@ f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("PLAYER_TALENT_UPDATE")
-f:SetScript("OnEvent", function(self, event, ...)
+f:SetScript("OnEvent", function(self, event, arg1)
 	if event == "ADDON_LOADED" and arg1 == folder then
 		if _G.ElvUI then
 			_G.TELLMEWHEN_VERSION = "1.2.4"
-			_G.TellMeWhen_Group_Update = TellMeWhen.Group_Update
+			_G.TellMeWhen_Group_Update = core.Group_Update
 			hasElvUI = true
 		end
 

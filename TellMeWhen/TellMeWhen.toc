@@ -2,7 +2,7 @@
 # Rewritten by Kader
 ## Interface: 30300
 ## Title: TellMeWhen
-## Author: Kader (|cff808080bkader#6361|r)
+## Author: Kader (|cff808080bkader#5341|r)
 ## Notes: Notifications about cooldowns, buffs, etc.
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## X-Date: 2022-03-02 @ 11:01 PM |cff808080UTC|r
